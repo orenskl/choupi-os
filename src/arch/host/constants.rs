@@ -22,8 +22,8 @@
 
 //! Platform definition for the stm32f401re
 
-use flash::SectorInfo;
-use {flash, fs};
+use crate::flash::SectorInfo;
+use crate::{flash, fs};
 
 // Semantically this is a 0x80000-aligned 0x80000 byte array (but a more-than-0x8000-aligned type
 // appears to not be supported)

@@ -26,7 +26,7 @@ use libc;
 use spin::Mutex;
 use std::sync::atomic::{AtomicBool, Ordering};
 
-use privilege;
+use crate::privilege;
 
 static SETUP: AtomicBool = AtomicBool::new(false);
 
@@ -121,7 +121,7 @@ use speculate::speculate;
 #[cfg(test)]
 use std::ptr::null_mut;
 #[cfg(test)]
-use {emulator, tools, RAM};
+use crate::{emulator, tools, RAM};
 
 #[cfg(test)]
 speculate! {

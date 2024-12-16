@@ -22,7 +22,7 @@
 
 //! Low-level emulator implementation
 
-use context_ll::Context;
+use crate::context_ll::Context;
 use ipc_channel::ipc;
 use libc::{user_fpregs_struct, user_regs_struct};
 use slog::Drain;
@@ -31,7 +31,8 @@ use std::panic::{RefUnwindSafe, UnwindSafe};
 use std::ptr::null_mut;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::{io, mem, panic, str};
-use {core, libc, mpu_ll, siginfo, slog, slog_term, syscall, RAM};
+use crate::{libc, mpu_ll, siginfo, slog, slog_term, syscall, RAM};
+use core::arch::asm;
 
 static ONE_TEST_AT_A_TIME: Mutex<()> = Mutex::new(());
 
@@ -146,12 +147,10 @@ unsafe fn wait_for_stop(pid: libc::pid_t) -> libc::c_int {
 pub unsafe extern "C" fn please_mprotect_lock(addr: *const u8) {
     libc::mprotect((addr as u64 & !0xFFF) as *mut _, 1, libc::PROT_NONE);
 }
-#[naked]
 unsafe fn please_mprotect_lock_entry() {
     asm!(
-        "call please_mprotect_lock
-          movq $$0, %rdi # EmulatorCall::DowncallReturn
-          int3"
+        "call please_mprotect_lock",
+        "int3" , in("rdi") EmulatorCall::DowncallReturn as usize
     );
 }
 
@@ -164,12 +163,10 @@ pub unsafe extern "C" fn please_mprotect_unlock(addr: *const u8) {
         mpu_ll::allows_addr(addr),
     );
 }
-#[naked]
 unsafe fn please_mprotect_unlock_entry() {
     asm!(
-        "call please_mprotect_unlock
-          movq $$0, %rdi # EmulatorCall::DowncallReturn
-          int3"
+        "call please_mprotect_unlock",
+        "int3" , in("rdi") EmulatorCall::DowncallReturn as usize
     );
 }
 
@@ -222,7 +219,7 @@ fn exited(stop: libc::c_int, rx: ipc::IpcReceiver<Result<(), String>>) {
         .recv()
         .expect("Unable to receive result from sub-process");
     if let Err(e) = recv {
-        panic!(e);
+        panic!("{}", e);
     } else {
         assert_eq!(unsafe { libc::WEXITSTATUS(stop) }, 0);
     }
@@ -672,15 +669,13 @@ pub extern "C" fn receive_syscall_impl(num: usize, arg1: usize, arg2: usize, arg
     syscall::syscall_received(num, arg1, arg2, arg3);
 }
 
-#[naked]
 extern "C" fn receive_syscall() {
     unsafe {
         asm!(
-            "call receive_syscall_impl
-              movq $$0, %rdi # EmulatorCall::DowncallReturn
-              int3"
+            "call receive_syscall_impl",
+            "int3" , in("rdi") EmulatorCall::DowncallReturn as usize
         );
-        core::intrinsics::unreachable()
+        std::unreachable!()
     }
 }
 
@@ -728,11 +723,14 @@ fn emulator_call(num: EmulatorCall, a1: usize, a2: usize, a3: usize, a4: usize) 
     }
     let res: usize;
     unsafe {
-        asm!("int3"
-             : "={rdi}"(res)
-             : "{rdi}"(num), "{rsi}"(a1), "{rdx}"(a2), "{rcx}"(a3), "{r8}"(a4)
-             :
-             : "volatile");
+        asm!(
+            "int3",
+            inout("rdi") num as usize => res,
+            in("rsi") a1,
+            in("rdx") a2,
+            in("rcx") a3,
+            in("r8") a4
+        );
     }
     res
 }

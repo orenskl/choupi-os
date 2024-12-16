@@ -48,8 +48,8 @@ pub fn output_str(x: &str) {
 /// Writes a `&str` via println function
 #[cfg(all(any(debug_assertions, test), feature = "host"))]
 pub fn output_str(x: &str) {
-    use privilege;
-    use syscall;
+    use crate::privilege;
+    use crate::syscall;
 
     if !DISABLE_DEBUG.load(Ordering::SeqCst) {
         if !privilege::is_privileged() {

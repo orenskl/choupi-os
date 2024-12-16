@@ -23,15 +23,15 @@
 //! Handle context switches between userland processes
 
 use alloc::vec::Vec;
-use context_ll::{ctx0_heap_begin, ctx0_heap_size, Context};
+use crate::context_ll::{ctx0_heap_begin, ctx0_heap_size, Context};
 use core::fmt;
 use core::mem::size_of;
 use core::ptr::NonNull;
 use core::sync::atomic::{AtomicUsize, Ordering};
-use mpu::Mpu;
-use registers::Stack;
+use crate::mpu::Mpu;
+use crate::registers::Stack;
 use spin::Mutex;
-use {alloc_ll, context_ll, core, program_begin, program_size, registers};
+use crate::{alloc_ll, context_ll, core, program_begin, program_size, registers};
 
 /// Metadata for each context
 static CONTEXTS: Mutex<Option<Vec<ContextMetadata>>> = Mutex::new(None);

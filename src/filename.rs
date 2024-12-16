@@ -20,8 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-use context::ContextID;
-use contextnum::ContextNumber;
+use crate::context::ContextID;
+use crate::contextnum::ContextNumber;
 
 #[repr(u8)]
 enum FileType {

@@ -24,14 +24,14 @@
 
 use alloc::boxed::Box;
 use alloc::vec::Vec;
-use context::CURRENT_CONTEXT;
+use crate::context::CURRENT_CONTEXT;
 use core::cmp::min;
 use core::ptr::{null, null_mut};
 use core::{mem, ptr, slice};
-use flash::{Flash, Sector};
-use fs::FileSystem;
-use syscall::{syscall, Syscall};
-use {
+use crate::flash::{Flash, Sector};
+use crate::fs::FileSystem;
+use crate::syscall::{syscall, Syscall};
+use crate::{
     context, filename, flash, flash_sectors, fs, registers, FLASH_APPLET_SECTOR,
     FLASH_DEFRAG_SECTOR, FLASH_FS_SECTORS, FLASH_PROGRAM_SECTORS,
 };

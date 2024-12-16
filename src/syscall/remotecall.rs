@@ -22,8 +22,8 @@
 
 //! Module for the syscall allowing to call functions in other contexts
 
-use context;
-use syscall::{syscall_saveall, Syscall};
+use crate::context;
+use crate::syscall::{syscall_saveall, Syscall};
 
 /// Call function in context syscall
 pub fn remote_call(c: context::ContextID, arg1: usize, arg2: usize) -> usize {

@@ -34,18 +34,7 @@
 //!  * `stm32f401re` for selecting the stm32f401re architecture-specific constants
 
 #![cfg_attr(feature = "embedded", no_std)]
-#![feature(
-    asm,
-    const_fn,
-    core_intrinsics,
-    lang_items,
-    naked_functions,
-    untagged_unions
-)]
-#![feature(alloc_error_handler)]
 #![cfg_attr(feature = "embedded", feature(allocator_api))]
-#![cfg_attr(test, feature(plugin))]
-#![feature(panic_info_message)]
 #![warn(missing_docs)]
 #![cfg_attr(
     feature = "cargo-clippy",
@@ -103,7 +92,7 @@ extern crate speculate;
 #[macro_use]
 pub mod debug;
 pub mod arch;
-use arch::*;
+use crate::arch::*;
 #[cfg(feature = "embedded")]
 pub mod runtime; // pub for extern lang items
 

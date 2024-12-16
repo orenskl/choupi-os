@@ -127,9 +127,9 @@ use alloc::vec::Vec;
 use core::borrow::Borrow;
 use core::hash::{Hash, Hasher};
 use core::usize;
-use flash::IOError as FlashIOError;
-use flash::{Flash, FlashBlock, Sector};
-use hashset::HashSet;
+use crate::flash::IOError as FlashIOError;
+use crate::flash::{Flash, FlashBlock, Sector};
+use crate::hashset::HashSet;
 
 /// An error that can happen during a filesystem operation
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]

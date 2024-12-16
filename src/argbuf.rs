@@ -22,7 +22,7 @@
 
 use core::mem::size_of;
 use core::slice;
-use {argbuf_size, argbuf_start};
+use crate::{argbuf_size, argbuf_start};
 
 unsafe fn get_argbuf_len() -> usize {
     let res = *(argbuf_start() as *mut usize);

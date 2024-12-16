@@ -27,7 +27,7 @@ use super::*;
 #[cfg(test)]
 use speculate::speculate; // Must be imported into the current scope.
 
-use {flash, flash_ll};
+use crate::{flash, flash_ll};
 
 speculate! {
     describe "crc" {
@@ -203,7 +203,7 @@ speculate! {
 
         #[ignore]
         it "allows spamming reads and writes" {
-            ::debug::DISABLE_DEBUG.store(true, ::std::sync::atomic::Ordering::SeqCst);
+            crate::debug::DISABLE_DEBUG.store(true, ::std::sync::atomic::Ordering::SeqCst);
             assert_eq!(fs.read(b"test").unwrap_err(), Error::NoSuchTag);
             for i in 0..100 {
                 for j in 0..1000 {
@@ -222,7 +222,7 @@ speculate! {
 
         #[ignore]
         it "allows spamming reads and edits" {
-            ::debug::DISABLE_DEBUG.store(true, ::std::sync::atomic::Ordering::SeqCst);
+            crate::debug::DISABLE_DEBUG.store(true, ::std::sync::atomic::Ordering::SeqCst);
             assert_eq!(fs.read(b"test").unwrap_err(), Error::NoSuchTag);
             fs.write(b"test", b"value-???-????").unwrap();
             for i in 0..100 {

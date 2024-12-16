@@ -35,16 +35,16 @@ use core::slice;
 use mpu::Mpu;
 #[cfg(feature = "embedded")]
 use {allocator, core, privilege, ram_begin, ram_size};
-use {argbuf, context, filename, flash, fs, syscall};
+use crate::{argbuf, context, filename, flash, fs, syscall};
 
 #[cfg(feature = "host")]
-use contextallocator::allocate_contexts;
+use crate::contextallocator::allocate_contexts;
 #[cfg(feature = "host")]
-use contextallocator::AllocatableContext as Context;
+use crate::contextallocator::AllocatableContext as Context;
 #[cfg(feature = "host")]
-use mpu::Mpu;
+use crate::mpu::Mpu;
 #[cfg(feature = "host")]
-use {emulator, privilege, ram_begin, ram_size, RAM};
+use crate::{emulator, privilege, ram_begin, ram_size, RAM};
 
 /*************\
  * Allocator *
@@ -312,13 +312,13 @@ pub unsafe extern "C" fn mpu_init_javacard() {
 /// Beginning of the shared RW segment (excluding the argument buffer)
 #[no_mangle]
 pub unsafe extern "C" fn shared_rw_start() -> *const u8 {
-    ::shared_rw_start()
+    crate::shared_rw_start()
 }
 
 /// Size of the shared RW segment (excluding the argument buffer)
 #[no_mangle]
 pub unsafe extern "C" fn shared_rw_size() -> u32 {
-    ::shared_rw_size() as u32
+    crate::shared_rw_size() as u32
 }
 
 /// Sets up the argument buffer
@@ -407,7 +407,7 @@ fn flash_init_error_to_errno(e: flash::InitError) -> u32 {
 #[no_mangle]
 #[cfg(feature = "host")]
 pub unsafe extern "C" fn flash_pointer() -> *mut u8 {
-    &mut ::arch::FLASH.get_mut()[0]
+    &mut crate::arch::FLASH.get_mut()[0]
 }
 
 /// Writes a byte to the flash.

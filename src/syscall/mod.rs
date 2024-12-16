@@ -22,8 +22,8 @@
 
 //! Handle syscalls
 
-use context;
-use syscall_ll;
+use crate::context;
+use crate::syscall_ll;
 
 mod tests;
 

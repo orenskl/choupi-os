@@ -22,10 +22,11 @@
 
 //! Handle stack switches
 
-use context::RemoteCallEnter;
+use crate::context::RemoteCallEnter;
 use core::ptr::NonNull;
-use registers::Stack;
-use {context, core, emulator, registers, RAM};
+use crate::registers::Stack;
+use crate::{context, core, emulator, registers, RAM};
+use core::arch::asm;
 
 /// Context saved and restored by hardware during an interrupt, especially during a syscall.
 ///
@@ -151,24 +152,23 @@ pub extern "C" fn effectively_start_remote_call(
     entrypoint(caller, arg1, arg2)
 }
 
-#[naked]
 extern "C" fn start_of_remote_call() -> ! {
     unsafe {
         // rdi, rsi and rdx are used as inputs
         asm!("# Call the remote function
-              movq %rsp, %rax
-              andq $$~0xF, %rsp
-              addq $$0x8, %rsp
-              push %rax
+              mov  rax, rsp
+              and  rsp,$$~0xF
+              add  rsp,$$0x8
+              push rax
               call effectively_start_remote_call
-              pop %rsp
+              pop  rsp
 
               # And return to the caller
-              movq $$6, %rdi # Send a syscall
-              movq $$1, %rsi # That is a remote result return
-              movq %rax, %rdx # With the return value from called function as an argument
+              mov  rdi, $$6   # Send a syscall
+              mov  rsi, $$1   # That is a remote result return
+              mov  rdx, rax   # With the return value from called function as an argument
               int3"
-        :::: "volatile");
-        core::intrinsics::unreachable();
+        );
+        std::unreachable!();
     }
 }

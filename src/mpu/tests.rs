@@ -25,7 +25,7 @@
 #[cfg(test)]
 use speculate::speculate;
 
-use emulator;
+use crate::emulator;
 
 speculate! {
     describe "mpu_tests" {

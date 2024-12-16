@@ -22,7 +22,7 @@
 
 //! Low-level "HAL" emulation for syscalls
 
-use emulator;
+use crate::emulator;
 
 /// Generates a syscall of number `num` with arguments `arg[1-3]`, returning the value returned
 /// from the syscall. Will call `syscall::syscall_received` as privileged code to handle this call.
