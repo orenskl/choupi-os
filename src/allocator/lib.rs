@@ -21,7 +21,6 @@
 // THE SOFTWARE.
 
 #![no_std]
-#![feature(allocator_api)]
 
 // extern crate alloc;
 extern crate linked_list_allocator as lla;
@@ -44,7 +43,8 @@ pub unsafe extern "C" fn initialize_heap() {
 
 pub unsafe fn initialize_heap_at(bottom: usize, size: usize) {
     let meta_size = size_of::<lla::Heap>();
-    *(bottom as *mut lla::Heap) = lla::Heap::new(bottom + meta_size, size - meta_size);
+    let bottom_addr = (bottom + meta_size) as *mut u8;
+    *(bottom as *mut lla::Heap) = lla::Heap::new(bottom_addr, size - meta_size);
 }
 
 pub struct Allocator;

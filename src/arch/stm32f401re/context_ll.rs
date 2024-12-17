@@ -28,6 +28,7 @@ use registers::Stack;
 use syscall::Syscall;
 use tools::LinkerSymbol;
 use {context, core, registers};
+use core::arch::asm;
 
 /// Context saved and restored by hardware during an interrupt, especially during a syscall.
 ///
@@ -85,7 +86,7 @@ pub unsafe fn switch_sp(new_location: NonNull<Context>) {
         Stack::Exception,
         "context::switch_sp can only be called from an exception handler!"
     );
-    asm!("msr PSP, $0" :: "r"(new_location.as_ptr()));
+    asm!("msr PSP, {0}" ,in(reg) new_location.as_ptr());
 }
 
 /// Sets the return value for currently active context
@@ -186,33 +187,34 @@ extern "C" fn start_of_remote_call(
 /// of the called function.
 ///
 /// It just triggers a syscall, in order to deliver the return value to the calling context.
-#[naked]
 extern "C" fn end_of_remote_call() -> ! {
     unsafe {
-        asm!("@ Setup syscall arguments
-              mov r1, r0    @ To-be-returned value
-              mov r0, $0    @ Syscall number
-
-              @ Clear registers to avoid any leak
-              mrs r2, APSR
-              bic r2, #0xF8000000
-              msr APSR, r2
-              mov r2, #0
-              mov r3, #0
-              mov r4, #0
-              mov r5, #0
-              mov r6, #0
-              mov r7, #0
-              mov r8, #0
-              mov r9, #0
-              mov r10, #0
-              mov r11, #0
-              mov r12, #0
-
-              @ And trigger the return
-              svc 0"
-          :: "i"(Syscall::RemoteResult)
-          :: "volatile");
-        core::intrinsics::unreachable()
+        asm!(
+            // Setup syscall arguments
+            "mov r1, r0",          // To-be-returned value
+    
+            // Clear registers to avoid any leak
+            "mrs r2, APSR",
+            "bic r2, #0xF8000000",
+            "msr APSR, r2",
+            "mov r2, #0",
+            "mov r3, #0",
+            "mov r4, #0",
+            "mov r5, #0",
+            "mov r6, #0",
+            "mov r7, #0",
+            "mov r8, #0",
+            "mov r9, #0",
+            "mov r10, #0",
+            "mov r11, #0",
+            "mov r12, #0",
+    
+            // Trigger the return
+            "svc 0",
+    
+            // Marks and options
+            in("r0") Syscall::RemoteResult as u32,
+            options(noreturn),
+        );
     }
 }

@@ -24,12 +24,13 @@
 
 use bindings::{SCB_AIRCR_SYSRESETREQ_Pos, SCB_Type, SCB_BASE};
 use core::ptr::{read_volatile, write_volatile};
+use core::arch::asm;
 
 /// Retrieves the current value of the `CONTROL` register
 pub fn get_control() -> u32 {
     let res;
     unsafe {
-        asm!("mrs $0, CONTROL" : "=r"(res) : : : "volatile");
+        asm!("mrs {res}, CONTROL" , res = out(reg) res);
     }
     res
 }
@@ -38,7 +39,7 @@ pub fn get_control() -> u32 {
 pub fn get_msp() -> u32 {
     let res;
     unsafe {
-        asm!("mrs $0, MSP" : "=r"(res) ::: "volatile");
+        asm!("mrs {res}, MSP" , res = out(reg) res);
     }
     res
 }
@@ -56,7 +57,7 @@ impl UntrustedPsp {
 pub fn get_psp() -> UntrustedPsp {
     let res;
     unsafe {
-        asm!("mrs $0, PSP" : "=r"(res) ::: "volatile");
+        asm!("mrs {res}, PSP" , res = out(reg) res);
     }
     UntrustedPsp(res)
 }
@@ -74,7 +75,7 @@ pub enum Stack {
 pub fn current_stack() -> Stack {
     let res: u32;
     unsafe {
-        asm!("mrs $0, IPSR" : "=r"(res));
+        asm!("mrs {res}, IPSR" , res = out(reg) res);
     }
     if res as u8 == 0 {
         // Get only low-order bits
@@ -93,6 +94,6 @@ pub unsafe fn reboot() -> ! {
                    (read_volatile(aircr) & 0x700) | // Keep priority group unchanged
                    (1 << SCB_AIRCR_SYSRESETREQ_Pos),
     ); // And reboot
-    asm!("dmb"::::"volatile");
+    asm!("dmb");
     loop {}
 }

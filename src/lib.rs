@@ -34,7 +34,6 @@
 //!  * `stm32f401re` for selecting the stm32f401re architecture-specific constants
 
 #![cfg_attr(feature = "embedded", no_std)]
-#![cfg_attr(feature = "embedded", feature(allocator_api))]
 #![warn(missing_docs)]
 #![cfg_attr(
     feature = "cargo-clippy",

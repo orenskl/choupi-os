@@ -38,20 +38,14 @@ extern "C" {
 // #[lang="panic_fmt"]
 #[panic_handler]
 #[no_mangle]
-pub extern "C" fn rust_begin_panic(info: &PanicInfo) -> !
-//(_args: core::fmt::Arguments, _file: &'static str, _line: usize)
+pub fn rust_begin_panic(info: &PanicInfo) -> !
 {
-    let _args = info.message().unwrap();
-    let _location = info.location().unwrap();
-
-    debug!("Caught panic at {}:{}!", _location.file(), _location.line());
-    debug!("Error message: {}", ::alloc::fmt::format(*_args));
+    debug!( "{}", info);
     loop {
         unsafe { Error_Handler() }
     }
 }
 
-#[alloc_error_handler]
 fn rust_begin_alloc_error(_: core::alloc::Layout) -> ! {
     debug!("Alloc error!");
     loop {
@@ -62,5 +56,4 @@ fn rust_begin_alloc_error(_: core::alloc::Layout) -> ! {
 /// Lang item used for generating unwind info.
 ///
 /// As there is no unwinding here, this lang item is useless.
-#[lang = "eh_personality"]
 pub extern "C" fn rust_eh_personality() {}
