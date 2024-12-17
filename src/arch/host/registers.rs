@@ -22,7 +22,7 @@
 
 //! Various helpers for manipulating the registers
 
-use emulator;
+use crate::emulator;
 
 #[derive(Debug, PartialEq, Eq)]
 /// Stack Type

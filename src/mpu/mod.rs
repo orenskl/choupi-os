@@ -31,7 +31,7 @@
 mod tests;
 
 use spin::{Mutex, MutexGuard};
-use {
+use crate::{
     applet_begin, applet_size, mpu_ll, program_begin, program_size, shared_ro_size,
     shared_ro_start, shared_rw_start, shared_rw_total_size, MPU_MIN_SIZE, MPU_SECTORS,
 };

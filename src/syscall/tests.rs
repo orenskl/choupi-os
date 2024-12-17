@@ -26,9 +26,9 @@ use super::*;
 #[cfg(test)]
 use speculate::speculate; // Must be imported into the current scope.
 
-use context::ContextMetadata;
-use mpu::Mpu;
-use {emulator, privilege, ram_begin, ram_size, syscall, RAM};
+use crate::context::ContextMetadata;
+use crate::mpu::Mpu;
+use crate::{emulator, privilege, ram_begin, ram_size, syscall, RAM};
 
 speculate! {
     describe "test_syscall" {
@@ -124,9 +124,9 @@ speculate! {
 
     describe "fs_syscalls" {
         it "handles a simple read-write-reinitialize loop from inside the emulator" {
-            use {flash, flash_ll};
-            use flash::Flash;
-            use fs::*;
+            use crate::{flash, flash_ll};
+            use crate::flash::Flash;
+            use crate::fs::*;
 
             let _only_one_at_a_time = flash_ll::FLASH_TEST_RUNNING.lock();
             emulator::run(|| {

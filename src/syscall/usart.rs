@@ -22,8 +22,8 @@
 
 //! Module for syscalls handling IO via the USART
 
-use syscall::{syscall, Syscall};
-use {context, usart_ll};
+use crate::syscall::{syscall, Syscall};
+use crate::{context, usart_ll};
 
 /// Write data to the USART
 pub fn output(msg: &str) {

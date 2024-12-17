@@ -22,7 +22,7 @@
 
 //! Module for a dummy test syscall
 
-use syscall::{syscall, Syscall};
+use crate::syscall::{syscall, Syscall};
 
 /// Call test syscall
 pub fn test() -> usize {
@@ -32,7 +32,7 @@ pub fn test() -> usize {
 /// Implementation of test syscall
 pub fn syscall_test(_: usize, _: usize, _: usize) -> Option<usize> {
     #[cfg(feature = "host")]
-    assert!(::privilege::is_privileged());
+    assert!(crate::privilege::is_privileged());
     debug!("TEST SYSCALL");
     Some(42)
 }

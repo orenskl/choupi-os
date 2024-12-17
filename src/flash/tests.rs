@@ -27,7 +27,8 @@ use super::*;
 #[cfg(test)]
 use speculate::speculate; // Must be imported into the current scope.
 
-use {FLASH, SECTORS};
+
+use crate::{FLASH, SECTORS};
 
 speculate! {
     describe "overlap" {
@@ -147,10 +148,8 @@ speculate! {
                     let b = sector.read(4, 2).unwrap();
                     assert_eq!(&*b, [4, 5]);
                     assert_eq!(sector.with_writer(&flash, 4, 1, |mut b| b.write(0, 0)), Err(IOError::LockedError));
-                    unsafe { asm!("" ::: "memory" : "volatile"); } // hopefully force pushing writes and pulling b again
                     assert_eq!(&*b, [4, 5]);
                     assert_eq!(sector.erase(&flash), Err(IOError::LockedError));
-                    unsafe { asm!("" ::: "memory" : "volatile"); } // hopefully force pushing writes and pulling b again
                     assert_eq!(&*b, [4, 5]);
                 }
                 sector.erase(&flash).unwrap();

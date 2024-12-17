@@ -33,6 +33,7 @@ use bindings::{
 use registers;
 
 use tools::{add_bits_volatile, set_bits_volatile};
+use core::arch::asm;
 
 /// Pointer to the MPU registers
 const MPU: *mut MPU_Type = MPU_BASE as _;
@@ -98,8 +99,8 @@ pub unsafe fn set_unprivileged_region(
         | (srd_field << MPU_RASR_SRD_Pos)
         | ((size_field << MPU_RASR_SIZE_Pos) & MPU_RASR_SIZE_Msk)
         | (1 << MPU_RASR_ENABLE_Pos);
-    asm!("dsb
-          isb" :::: "volatile");
+    asm!("dsb",
+         "isb");
     set_bits_volatile(
         &mut (*MPU).RASR,
         MPU_RASR_XN_Msk

@@ -22,7 +22,7 @@
 
 //! USART implementation
 
-use privilege;
+use crate::privilege;
 use std;
 
 /// Writing buffer

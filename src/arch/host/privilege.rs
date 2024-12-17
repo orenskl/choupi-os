@@ -22,7 +22,7 @@
 
 //! Handling privilege level change
 
-use emulator;
+use crate::emulator;
 
 /// Emulator runs in privileged mode?
 pub fn is_privileged() -> bool {

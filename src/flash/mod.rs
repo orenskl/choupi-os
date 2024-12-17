@@ -32,9 +32,9 @@ use core::borrow::Borrow;
 use core::ops::Deref;
 use core::ptr::{read_unaligned, read_volatile};
 use core::slice;
-use hashset::HashSet;
+use crate::hashset::HashSet;
 use spin::{Mutex, MutexGuard};
-use {core, flash_ll, FLASH_LOCK_BUCKETS};
+use crate::{core, flash_ll, FLASH_LOCK_BUCKETS};
 
 /// Errors that can happen when trying to initialize the flash datastructures.
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]

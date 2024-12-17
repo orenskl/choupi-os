@@ -24,7 +24,7 @@
 
 use spin::Mutex;
 use std::sync::atomic::{AtomicBool, Ordering};
-use {privilege, FLASH, SECTORS};
+use crate::{privilege, FLASH, SECTORS};
 
 /// Flash lock flag
 static LOCKED: AtomicBool = AtomicBool::new(true);
@@ -32,11 +32,11 @@ static LOCKED: AtomicBool = AtomicBool::new(true);
 pub static FLASH_TEST_RUNNING: Mutex<()> = Mutex::new(());
 
 /// Emulate flasg sectors access
-pub fn sectors() -> Vec<::flash::SectorInfo> {
+pub fn sectors() -> Vec<crate::flash::SectorInfo> {
     SECTORS
         .iter()
         .enumerate()
-        .map(|(i, &(begin, size))| ::flash::SectorInfo {
+        .map(|(i, &(begin, size))| crate::flash::SectorInfo {
             num: i as u32,
             start: unsafe { (&mut FLASH.get_mut()[0] as *mut u8).offset(begin as isize) },
             length: size,

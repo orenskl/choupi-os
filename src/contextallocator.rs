@@ -22,8 +22,8 @@
 
 //! Allocator allocating RAM blocks to contexts
 
-use context::{ContextMetadata, RemoteCallEnter, TopOfStack};
-use context_ll::{available_size, begin_addr, ctx0_heap_begin, ctx0_heap_size};
+use crate::context::{ContextMetadata, RemoteCallEnter, TopOfStack};
+use crate::context_ll::{available_size, begin_addr, ctx0_heap_begin, ctx0_heap_size};
 #[cfg(feature = "embedded")]
 use context_ll::{ctx0_stack_highest, ctx0_stack_lowest};
 use core::intrinsics::write_bytes;
@@ -58,8 +58,8 @@ pub fn ctx0_metadata(entrypoint: RemoteCallEnter) -> ContextMetadata {
 pub fn ctx0_metadata(entrypoint: RemoteCallEnter) -> ContextMetadata {
     ContextMetadata {
         remote_call_enter: entrypoint,
-        begin: ::ram_begin() as usize,
-        size: ::ram_size().next_power_of_two(),
+        begin: crate::ram_begin() as usize,
+        size: crate::ram_size().next_power_of_two(),
         top_of_stack: unsafe { TopOfStack::empty(0, 0) },
         heap_begin: ctx0_heap_begin(),
         heap_size: ctx0_heap_size(),

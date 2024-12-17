@@ -25,6 +25,7 @@
 use bindings::{CONTROL_SPSEL_Msk, CONTROL_nPRIV_Msk};
 use registers;
 use registers::{current_stack, Stack};
+use core::arch::asm;
 
 /// Drops privileges and switches to PSP
 ///
@@ -52,14 +53,27 @@ pub unsafe fn drop(interrupt_stack: *mut ()) {
         0,
         "privilege::drop() can only be called from MSP"
     );
-    asm!("mrs r0, MSP
-          msr PSP, r0
-          msr MSP, r1
-          msr CONTROL, r2
-          isb"
-      :: "{r1}"(interrupt_stack), "{r2}"(control_reg | CONTROL_nPRIV_Msk | CONTROL_SPSEL_Msk)
-       : "r0"
-       : "volatile");
+    asm!(
+        // Move current MSP to r0
+        "mrs r0, MSP",
+        
+        // Move r0 to PSP
+        "msr PSP, r0",
+        
+        // Set MSP to r1
+        "msr MSP, {0}",
+        
+        // Set CONTROL to r2
+        "msr CONTROL, {1}",
+        
+        // Instruction synchronization barrier
+        "isb",
+        
+        in(reg) interrupt_stack,
+        in(reg) (control_reg | CONTROL_nPRIV_Msk | CONTROL_SPSEL_Msk),
+        out("r0") _, // Marks r0 as clobbered
+        options(nomem, nostack, preserves_flags),
+    );
 }
 
 /// Returns true if current code is running privileged
