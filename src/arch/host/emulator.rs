@@ -33,6 +33,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::{io, mem, panic, str};
 use crate::{libc, mpu_ll, siginfo, slog, slog_term, syscall, RAM};
 use core::arch::asm;
+use std::arch::global_asm;
 
 static ONE_TEST_AT_A_TIME: Mutex<()> = Mutex::new(());
 
@@ -147,11 +148,18 @@ unsafe fn wait_for_stop(pid: libc::pid_t) -> libc::c_int {
 pub unsafe extern "C" fn please_mprotect_lock(addr: *const u8) {
     libc::mprotect((addr as u64 & !0xFFF) as *mut _, 1, libc::PROT_NONE);
 }
-unsafe fn please_mprotect_lock_entry() {
-    asm!(
-        "call please_mprotect_lock",
-        "int3" , in("rdi") EmulatorCall::DowncallReturn as usize
-    );
+
+global_asm!(
+    r#"
+    .global please_mprotect_lock_entry
+    please_mprotect_lock_entry:
+        call please_mprotect_lock
+        mov rdi,0  # EmulatorCall::DowncallReturn
+        int 3
+    "#
+);
+extern "C" {
+    fn please_mprotect_lock_entry();
 }
 
 /// This being called inside preempted println!'s, trying to println! here would deadlock.
@@ -163,11 +171,18 @@ pub unsafe extern "C" fn please_mprotect_unlock(addr: *const u8) {
         mpu_ll::allows_addr(addr),
     );
 }
-unsafe fn please_mprotect_unlock_entry() {
-    asm!(
-        "call please_mprotect_unlock",
-        "int3" , in("rdi") EmulatorCall::DowncallReturn as usize
-    );
+
+global_asm!(
+    r#"
+    .global please_mprotect_unlock_entry
+    please_mprotect_unlock_entry:
+        call please_mprotect_unlock
+        mov rdi,0  # EmulatorCall::DowncallReturn
+        int 3
+    "#
+);
+extern "C" {
+    fn please_mprotect_unlock_entry();
 }
 
 unsafe fn launch_test<F>(f: F, oldset: libc::sigset_t, tx: ipc::IpcSender<Result<(), String>>) -> !
@@ -669,14 +684,17 @@ pub extern "C" fn receive_syscall_impl(num: usize, arg1: usize, arg2: usize, arg
     syscall::syscall_received(num, arg1, arg2, arg3);
 }
 
-extern "C" fn receive_syscall() {
-    unsafe {
-        asm!(
-            "call receive_syscall_impl",
-            "int3" , in("rdi") EmulatorCall::DowncallReturn as usize
-        );
-        std::unreachable!()
-    }
+global_asm!(
+    r#"
+    .global receive_syscall
+    receive_syscall:
+        call receive_syscall_impl
+        mov rdi,0   # EmulatorCall::DowncallReturn
+        int 3
+    "#
+);
+extern "C" {
+    fn receive_syscall();
 }
 
 #[repr(usize)]

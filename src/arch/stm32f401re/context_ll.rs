@@ -29,6 +29,7 @@ use syscall::Syscall;
 use tools::LinkerSymbol;
 use {context, core, registers};
 use core::arch::asm;
+use core::arch::global_asm;
 
 /// Context saved and restored by hardware during an interrupt, especially during a syscall.
 ///
@@ -139,12 +140,12 @@ pub fn ctx0_stack_highest() -> usize {
 
 /// Size of the memory range allocated to contexts by the linker script
 ///
+/// Begin address of the memory range allocated to contexts by the linker script
 /// (see also `begin_addr`)
 pub fn available_size() -> usize {
     unsafe { &mpu_contexts_size as *const _ as usize }
 }
 
-/// Begin address of the memory range allocated to contexts by the linker script
 ///
 /// (see also `available_size`)
 pub fn begin_addr() -> usize {
@@ -187,34 +188,34 @@ extern "C" fn start_of_remote_call(
 /// of the called function.
 ///
 /// It just triggers a syscall, in order to deliver the return value to the calling context.
-extern "C" fn end_of_remote_call() -> ! {
-    unsafe {
-        asm!(
-            // Setup syscall arguments
-            "mov r1, r0",          // To-be-returned value
+global_asm!(
+    r#"
+    .global end_of_remote_call
+    end_of_remote_call:
+        # Setup syscall arguments
+        mov r1, r0
     
-            // Clear registers to avoid any leak
-            "mrs r2, APSR",
-            "bic r2, #0xF8000000",
-            "msr APSR, r2",
-            "mov r2, #0",
-            "mov r3, #0",
-            "mov r4, #0",
-            "mov r5, #0",
-            "mov r6, #0",
-            "mov r7, #0",
-            "mov r8, #0",
-            "mov r9, #0",
-            "mov r10, #0",
-            "mov r11, #0",
-            "mov r12, #0",
+        # Clear registers to avoid any leak
+        mrs r2, APSR
+        bic r2, #0xF8000000
+        msr APSR, r2
+        mov r2, #0
+        mov r3, #0
+        mov r4, #0
+        mov r5, #0
+        mov r6, #0
+        mov r7, #0
+        mov r8, #0
+        mov r9, #0
+        mov r10, #0
+        mov r11, #0
+        mov r12, #0
     
-            // Trigger the return
-            "svc 0",
-    
-            // Marks and options
-            in("r0") Syscall::RemoteResult as u32,
-            options(noreturn),
-        );
-    }
+        # Trigger the return
+        svc 0
+    "#
+);
+extern "C" {
+    fn end_of_remote_call();
 }
+

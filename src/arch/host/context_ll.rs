@@ -26,7 +26,7 @@ use crate::context::RemoteCallEnter;
 use core::ptr::NonNull;
 use crate::registers::Stack;
 use crate::{context, core, emulator, registers, RAM};
-use core::arch::asm;
+use std::arch::global_asm;
 
 /// Context saved and restored by hardware during an interrupt, especially during a syscall.
 ///
@@ -152,23 +152,26 @@ pub extern "C" fn effectively_start_remote_call(
     entrypoint(caller, arg1, arg2)
 }
 
-extern "C" fn start_of_remote_call() -> ! {
-    unsafe {
-        // rdi, rsi and rdx are used as inputs
-        asm!("# Call the remote function
-              mov  rax, rsp
-              and  rsp,$$~0xF
-              add  rsp,$$0x8
-              push rax
-              call effectively_start_remote_call
-              pop  rsp
+global_asm!(
+    r#"
+    .global start_of_remote_call
+    start_of_remote_call:
+        # Call the remote function
+        mov  rax, rsp
+        and  rsp,~0xF
+        add  rsp,0x8
+        push rax
+        call effectively_start_remote_call
+        pop  rsp
 
-              # And return to the caller
-              mov  rdi, $$6   # Send a syscall
-              mov  rsi, $$1   # That is a remote result return
-              mov  rdx, rax   # With the return value from called function as an argument
-              int3"
-        );
-        std::unreachable!();
-    }
+        # And return to the caller
+        mov  rdi, 6    # Send a syscall
+        mov  rsi, 1    # That is a remote result return
+        mov  rdx, rax   # With the return value from called function as an argument
+        int3
+    "#
+);
+extern "C" {
+    fn start_of_remote_call();
 }
+
