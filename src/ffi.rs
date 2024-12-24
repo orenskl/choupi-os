@@ -898,7 +898,7 @@ pub extern "C" fn run_emulator() {
          */
 
         unsafe {
-            print!("Initialising MPU ...");
+            println!("Initialising MPU ...");
             let mut mpu = Mpu::get();
             mpu.setup();
             mpu.setup_unpriv_regions();
@@ -906,7 +906,7 @@ pub extern "C" fn run_emulator() {
             drop(mpu); // Release lock to leave it open for interrupt handler
             println!(" ok");
 
-            print!("Initialising FS ...");
+            println!("Initialising FS ...");
             fs_init();
             println!(" ok");
 
